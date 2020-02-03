@@ -3,13 +3,13 @@ set -eu
 
 declare -A aliases
 aliases=(
-	[mainline]='1 1.13 latest'
-	[stable]='1.12'
+	[mainline]='1 1.17 latest'
+	[stable]='1.16'
 )
 
 self="$(basename "$BASH_SOURCE")"
 cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
-base=stretch
+base=buster
 
 versions=( */ )
 versions=( "${versions[@]%/}" )
@@ -54,7 +54,6 @@ for version in "${versions[@]}"; do
 	commit="$(dirCommit "$version/$base")"
 
 	fullVersion="$(git show "$commit":"$version/$base/Dockerfile" | awk '$1 == "ENV" && $2 == "NGINX_VERSION" { print $3; exit }')"
-	fullVersion="${fullVersion%[.-]*}"
 
 	versionAliases=( $fullVersion )
 	if [ "$version" != "$fullVersion" ]; then
@@ -70,7 +69,7 @@ for version in "${versions[@]}"; do
 		Directory: $version/$base
 	EOE
 
-	for variant in stretch-perl; do
+	for variant in buster-perl; do
 		commit="$(dirCommit "$version/$variant")"
 
 		variantAliases=( "${versionAliases[@]/%/-perl}" )
@@ -91,11 +90,10 @@ for version in "${versions[@]}"; do
 		variantAliases=( "${versionAliases[@]/%/-$variant}" )
 		variantAliases=( "${variantAliases[@]//latest-/}" )
 
-		# TODO Architectures once https://github.com/gliderlabs/docker-alpine/issues/304 is resolved
-
 		echo
 		cat <<-EOE
 			Tags: $(join ', ' "${variantAliases[@]}")
+			Architectures: amd64, arm32v6, arm64v8, i386, ppc64le, s390x
 			GitCommit: $commit
 			Directory: $version/$variant
 		EOE
