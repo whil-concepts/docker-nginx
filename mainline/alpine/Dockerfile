@@ -6,6 +6,8 @@ ENV NGINX_VERSION 1.17.8
 ENV NJS_VERSION   0.3.8
 ENV PKG_RELEASE   1
 
+COPY nginx.whil.conf /etc/nginx/nginx.conf
+
 RUN set -x \
 # create nginx user/group first, to be consistent throughout docker variants
     && addgroup -g 101 -S nginx \
